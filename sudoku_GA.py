@@ -3,32 +3,25 @@ import random
 import time
 
 # Parameters for the genetic algorithm
-POPULATION_SIZE = 700
-MUTATION_RATE = 0.2
-GENERATIONS = 2000
-ELITISM_COUNT = 7
-
-# Initial puzzle (0 represents empty cells)
-# puzzle = [
-#     [5, 3, 0, 0, 7, 0, 0, 0, 0],
-#     [6, 0, 0, 1, 9, 5, 0, 0, 0],
-#     [0, 9, 8, 0, 0, 0, 0, 6, 0],
-#     [8, 0, 0, 0, 6, 0, 0, 0, 3],
-#     [4, 0, 0, 8, 0, 3, 0, 0, 1],
-#     [7, 0, 0, 0, 2, 0, 0, 0, 6],
-#     [0, 6, 0, 0, 0, 0, 2, 8, 0],
-#     [0, 0, 0, 4, 1, 9, 0, 0, 5],
-#     [0, 0, 0, 0, 8, 0, 0, 7, 9]
-# ]
+POPULATION_SIZE = 500
+MUTATION_RATE = 0.1
+GENERATIONS = 1000
+ELITISM_COUNT = 5
 
 # Helper functions
 def create_individual(puzzle):
-    """Create a single individual with unique values in each row."""
+    """
+        Initialize the board 
+        FOR EACH ROW OF THE BOARD, IT WILL BE FILLED WITH RANDOM VALUE SO THAT EACH ROW DOESN'T HAVE ANY DUPLICATE VALUES
+    """
     individual = []
     for row in puzzle:
         new_row = np.array(row)
+        # FIND INDEX THAT CONTAINS EMPTY VALUE
         empty_indices = [i for i in range(9) if new_row[i] == 0]
+        # FIND ALL THE POSSIBLE VALUES EXCEPT THOSE FIXED VALUES
         possible_values = list(set(range(1, 10)) - set(new_row))
+        # SHUFFLE TO POSSIBLE VALUES
         random.shuffle(possible_values)
         for i, index in enumerate(empty_indices):
             new_row[index] = possible_values[i]
@@ -44,7 +37,9 @@ def fitness(individual):
     col_score = sum(len(np.unique(individual[:, col])) for col in range(9))
     subgrid_score = sum(len(np.unique(individual[row:row+3, col:col+3])) 
                         for row in range(0, 9, 3) for col in range(0, 9, 3))
-    return col_score + subgrid_score
+    # All the row in the board doesn't have any duplicated values so the row_score will always be 81
+    row_score = 81
+    return col_score + subgrid_score + row_score
 
 def selection(population, fitness_scores):
     """Select individuals based on fitness scores."""
@@ -86,17 +81,19 @@ def genetic_algorithm(puzzle, crossover_method, mutation_method):
     start_time = time.time()
     
     for generation in range(GENERATIONS):
+        
         # Calculate fitness scores
         fitness_scores = [fitness(ind) for ind in population]
         max_fitness = max(fitness_scores)
         best_individual = population[fitness_scores.index(max_fitness)]
         
         # Check if solution is found
-        if max_fitness == 162:  # 9 columns + 9 subgrids all max out at 9 unique values each
-            print(f"Solved in generation {generation}")
+        if max_fitness == 243:  # 9 columns + 9 subgrids all max out at 9 unique values each
+            print(f"Solved in generation {generation}", flush = True)
             print(f"Time taken: {time.time() - start_time:.2f} seconds")
             return best_individual, max_fitness
-        
+        else:
+            print("THE ALGORITHM IS RUNNING", end = '\r')
         # Sort population by fitness for elitism
         sorted_population = sorted(population, key=fitness, reverse=True)
         
@@ -117,6 +114,7 @@ def genetic_algorithm(puzzle, crossover_method, mutation_method):
     return best_individual, max_fitness
 
 def calculate_num_of_blanks(board):
+    """CALCULATE THE NUMBER OF BLANKS IN THE BOARD"""
     unique, counts = np.unique(board, return_counts=True)
     return counts[0]
 
