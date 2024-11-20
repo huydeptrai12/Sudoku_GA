@@ -4,4 +4,4 @@ You can specify the difficulty (eg: 0.3) of the initial sudoku by typing in the 
 python test.py 0.3
 
 If the difficulty is higher than 0.5, the algorithm tends to fail to find the solution.
-For difficulty from (0, 0.5] it takes significantly less time to execute.# Sudoku_GA
+For difficulty from (0, 0.5] it takes significantly less time to execute.
